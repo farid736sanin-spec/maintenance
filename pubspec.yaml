@@ -1,0 +1,45 @@
+name: maintenance
+description: Desktop maintenance records with dynamic forms and database-side querying.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.13.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  provider: ^6.1.2
+  path: ^1.9.0
+  path_provider: ^2.1.4
+  sqflite_common_ffi: ^2.3.4
+  sqlite3_flutter_libs: ^0.5.24
+  shared_preferences: ^2.3.3
+  intl: ^0.20.2
+  excel: ^4.0.6
+  collection: ^1.19.1
+  file_picker: ^8.1.7
+  http: ^1.2.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.3
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/icon/app_icon.png
+
+flutter_launcher_icons:
+  android: false
+  ios: false
+  image_path: assets/icon/app_icon.png
+  linux:
+    generate: true
+  windows:
+    generate: true
+  macos:
+    generate: true
