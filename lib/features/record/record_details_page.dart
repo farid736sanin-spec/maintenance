@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../widgets/kernel_build_button.dart';
+
 import '../../data/maintenance_repository.dart';
 import '../../models/field_definition.dart';
 import '../../models/maintenance_record.dart';
@@ -17,7 +19,10 @@ class RecordDetailsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Maintenance Record Details')),
+      appBar: AppBar(
+        title: const Text('Maintenance Record Details'),
+        actions: const [KernelBuildButton()],
+      ),
       body: FutureBuilder<(MaintenanceRecordRow?, List<FieldDefinition>)>(
         future: _load(),
         builder: (context, snapshot) {

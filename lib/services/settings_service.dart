@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../models/ai_backend.dart';
+import '../models/app_theme.dart';
 import '../models/field_definition.dart';
 import '../models/field_definition_codec.dart';
 
@@ -17,8 +19,24 @@ class SettingsService {
   static const _lmStudioBaseUrlKey = 'settings.lm_studio_base_url';
   static const _lmStudioApiTokenKey = 'settings.lm_studio_api_token';
   static const _lmStudioSelectedModelKey = 'settings.lm_studio_selected_model';
+  static const _aiBackendKey = 'settings.ai_backend';
+  static const _liteRtModelFolderKey = 'settings.litert_model_folder';
+  static const _liteRtModelPathKey = 'settings.litert_model_path';
+  static const _themeKey = 'settings.theme';
 
   static const defaultLmStudioBaseUrl = 'http://127.0.0.1:1234';
+
+  Future<AppTheme> loadTheme() async {
+    final prefs = await SharedPreferences.getInstance();
+    return AppTheme.fromStorage(prefs.getString(_themeKey));
+  }
+
+  Future<void> saveTheme(AppTheme theme) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (!await prefs.setString(_themeKey, theme.name)) {
+      throw StateError('Could not save theme preference');
+    }
+  }
 
   Future<List<int>> getPageSizeOptions() async {
     final prefs = await SharedPreferences.getInstance();
@@ -143,5 +161,35 @@ class SettingsService {
   Future<void> saveLmStudioSelectedModel(String modelKey) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_lmStudioSelectedModelKey, modelKey);
+  }
+
+  Future<AiBackend> loadAiBackend() async {
+    final prefs = await SharedPreferences.getInstance();
+    return AiBackend.fromStorage(prefs.getString(_aiBackendKey));
+  }
+
+  Future<void> saveAiBackend(AiBackend backend) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_aiBackendKey, backend.storageValue);
+  }
+
+  Future<String?> loadLiteRtModelFolder() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_liteRtModelFolderKey);
+  }
+
+  Future<void> saveLiteRtModelFolder(String path) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_liteRtModelFolderKey, path);
+  }
+
+  Future<String?> loadLiteRtModelPath() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_liteRtModelPathKey);
+  }
+
+  Future<void> saveLiteRtModelPath(String path) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_liteRtModelPathKey, path);
   }
 }

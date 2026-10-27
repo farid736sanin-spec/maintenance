@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../data/maintenance_repository.dart';
 import '../../models/field_definition.dart';
 import '../../models/maintenance_record.dart';
+import '../../widgets/kernel_build_button.dart';
 import '../export/excel_export.dart';
 import '../import/excel_import_dialog.dart';
 import '../record/record_details_page.dart';
@@ -156,6 +157,7 @@ class _MaintenanceHomePageState extends State<MaintenanceHomePage> {
             onPressed: () => _openNewRecord(context, controller),
             filled: true,
           ),
+          const KernelBuildButton(),
         ],
       ),
     );

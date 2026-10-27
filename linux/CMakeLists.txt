@@ -9,6 +9,9 @@ set(BINARY_NAME "maintenance")
 # https://wiki.gnome.org/HowDoI/ChooseApplicationID
 set(APPLICATION_ID "com.maintenance.maintenance")
 
+# LiteRT-LM is bundled by flutter_gemma_litertlm as libLiteRtLm through Dart
+# native assets. Do not link liblite_rt.so from this file.
+
 # Explicitly opt in to modern CMake behaviors to avoid warnings with recent
 # versions of CMake.
 cmake_policy(SET CMP0063 NEW)

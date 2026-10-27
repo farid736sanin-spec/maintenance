@@ -5,6 +5,8 @@ import '../../data/maintenance_repository.dart';
 import '../../models/default_field_templates.dart';
 import '../../models/field_definition.dart';
 import '../../utils/field_id.dart';
+import '../../widgets/kernel_build_button.dart';
+import 'appearance_settings_section.dart';
 import 'field_editor_dialog.dart';
 import 'generate_random_data_dialog.dart';
 import 'lm_studio_settings_section.dart';
@@ -109,7 +111,9 @@ class _SettingsPageState extends State<SettingsPage> {
     if (toAdd.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Select fields you created that are not already in the list'),
+          content: Text(
+            'Select fields you created that are not already in the list',
+          ),
         ),
       );
       return;
@@ -259,9 +263,8 @@ class _SettingsPageState extends State<SettingsPage> {
       _userLibrary = await repo.getUserCreatedFieldLibrary();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Save failed: $e')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Save failed: $e')));
       return;
     }
     if (!mounted) return;
@@ -301,9 +304,8 @@ class _SettingsPageState extends State<SettingsPage> {
     await context.read<MaintenanceRepository>().clearAllUserData();
     await _load();
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('All data cleared')),
-    );
+    ScaffoldMessenger.of(context)
+        .showSnackBar(const SnackBar(content: Text('All data cleared')));
   }
 
   Future<bool> _onWillPop() async {
@@ -375,6 +377,7 @@ class _SettingsPageState extends State<SettingsPage> {
               onPressed: _loading ? null : _save,
               child: const Text('Save'),
             ),
+            const KernelBuildButton(),
             const SizedBox(width: 12),
           ],
         ),
@@ -383,162 +386,185 @@ class _SettingsPageState extends State<SettingsPage> {
             : ListView(
                 padding: const EdgeInsets.all(24),
                 children: [
-                  const LmStudioSettingsSection(),
-                  const SizedBox(height: 24),
-                  Text(
-                    'Add from default fields',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Check fields below, then press Save (checked items are added automatically). '
-                    'Or use "Add selected to list" first, then Save.',
+                  const _SettingsSection(
+                    title: 'Appearance',
+                    icon: Icons.palette_outlined,
+                    children: [AppearanceSettingsSection()],
                   ),
                   const SizedBox(height: 12),
-                  Card(
-                    child: Column(
-                      children: [
-                        for (var i = 0;
-                            i < DefaultFieldTemplate.catalog.length;
-                            i++) ...[
-                          if (i > 0) const Divider(height: 1),
-                          _templateTile(DefaultFieldTemplate.catalog[i]),
-                        ],
-                      ],
-                    ),
+                  const _SettingsSection(
+                    title: 'AI',
+                    icon: Icons.smart_toy_outlined,
+                    children: [LmStudioSettingsSection()],
                   ),
                   const SizedBox(height: 12),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: FilledButton.tonal(
-                      onPressed: _addSelectedTemplatesToDraft,
-                      child: const Text('Add selected to list'),
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-                  Text(
-                    'Fields you created',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Re-use fields from your library (saved when you press Save). '
-                    'Select and add them to the list below.',
-                  ),
-                  const SizedBox(height: 12),
-                  if (_userLibrary.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 8),
-                      child: Text(
-                        'No saved fields yet. Add a custom field and Save once.',
-                      ),
-                    )
-                  else
-                    Card(
-                      child: Column(
-                        children: [
-                          for (var i = 0; i < _userLibrary.length; i++) ...[
-                            if (i > 0) const Divider(height: 1),
-                            _userLibraryTile(_userLibrary[i]),
-                          ],
-                        ],
-                      ),
-                    ),
-                  if (_userLibrary.isNotEmpty) ...[
-                    const SizedBox(height: 12),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: FilledButton.tonal(
-                        onPressed: _addSelectedUserFieldsToDraft,
-                        child: const Text('Add selected to list'),
-                      ),
-                    ),
-                  ],
-                  const SizedBox(height: 32),
-                  Text(
-                    'Fields for home page & new records',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 8),
-                  if (_draftFields.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 16),
-                      child: Text(
-                        'No fields in your list yet. Add defaults or a custom field, then Save.',
-                      ),
-                    )
-                  else
-                    Card(
-                      child: Column(
-                        children: [
-                          for (var i = 0; i < _draftFields.length; i++) ...[
-                            if (i > 0) const Divider(height: 1),
-                            ListTile(
-                              title: Text(_draftFields[i].label),
-                              subtitle: Text(
-                                '${_typeLabel(_draftFields[i].type)}'
-                                '${_draftFields[i].defaultValue != null ? ' · default: ${_draftFields[i].defaultValue}' : ''}',
-                              ),
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.edit_outlined),
-                                    onPressed: () => _editField(i),
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.delete_outline),
-                                    onPressed: () => _removeField(i),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                  const SizedBox(height: 16),
-                  Wrap(
-                    spacing: 12,
-                    runSpacing: 8,
+                  _SettingsSection(
+                    title: 'Add from default fields',
+                    icon: Icons.playlist_add,
                     children: [
-                      OutlinedButton.icon(
-                        onPressed: _addCustomField,
-                        icon: const Icon(Icons.add),
-                        label: const Text('Add custom field'),
+                      const Text(
+                        'Check fields below, then press Save (checked items are added automatically). '
+                        'Or use "Add selected to list" first, then Save.',
                       ),
-                      OutlinedButton.icon(
-                        onPressed: _pickUserFieldOnly,
-                        icon: const Icon(Icons.library_add_outlined),
-                        label: const Text('Select from my fields'),
+                      const SizedBox(height: 12),
+                      Card(
+                        child: Column(
+                          children: [
+                            for (
+                              var i = 0;
+                              i < DefaultFieldTemplate.catalog.length;
+                              i++
+                            ) ...[
+                              if (i > 0) const Divider(height: 1),
+                              _templateTile(DefaultFieldTemplate.catalog[i]),
+                            ],
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: FilledButton.tonal(
+                          onPressed: _addSelectedTemplatesToDraft,
+                          child: const Text('Add selected to list'),
+                        ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 32),
-                  Text(
-                    'Test data',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Generate random rows only for saved fields you select in the dialog.',
+                  const SizedBox(height: 12),
+                  _SettingsSection(
+                    title: 'Fields you created',
+                    icon: Icons.library_books_outlined,
+                    children: [
+                      const Text(
+                        'Re-use fields from your library (saved when you press Save). '
+                        'Select and add them to the list below.',
+                      ),
+                      const SizedBox(height: 12),
+                      if (_userLibrary.isEmpty)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 8),
+                          child: Text(
+                            'No saved fields yet. Add a custom field and Save once.',
+                          ),
+                        )
+                      else
+                        Card(
+                          child: Column(
+                            children: [
+                              for (var i = 0; i < _userLibrary.length; i++) ...[
+                                if (i > 0) const Divider(height: 1),
+                                _userLibraryTile(_userLibrary[i]),
+                              ],
+                            ],
+                          ),
+                        ),
+                      if (_userLibrary.isNotEmpty) ...[
+                        const SizedBox(height: 12),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: FilledButton.tonal(
+                            onPressed: _addSelectedUserFieldsToDraft,
+                            child: const Text('Add selected to list'),
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                   const SizedBox(height: 12),
-                  OutlinedButton.icon(
-                    onPressed: _generateRandom,
-                    icon: const Icon(Icons.auto_awesome),
-                    label: const Text('Generate random records…'),
+                  _SettingsSection(
+                    title: 'Fields for home page & new records',
+                    icon: Icons.view_column_outlined,
+                    children: [
+                      if (_draftFields.isEmpty)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 16),
+                          child: Text(
+                            'No fields in your list yet. Add defaults or a custom field, then Save.',
+                          ),
+                        )
+                      else
+                        Card(
+                          child: Column(
+                            children: [
+                              for (var i = 0; i < _draftFields.length; i++) ...[
+                                if (i > 0) const Divider(height: 1),
+                                ListTile(
+                                  title: Text(_draftFields[i].label),
+                                  subtitle: Text(
+                                    '${_typeLabel(_draftFields[i].type)}'
+                                    '${_draftFields[i].defaultValue != null ? ' · default: ${_draftFields[i].defaultValue}' : ''}',
+                                  ),
+                                  trailing: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      IconButton(
+                                        icon: const Icon(Icons.edit_outlined),
+                                        onPressed: () => _editField(i),
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(Icons.delete_outline),
+                                        onPressed: () => _removeField(i),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      const SizedBox(height: 16),
+                      Wrap(
+                        spacing: 12,
+                        runSpacing: 8,
+                        children: [
+                          OutlinedButton.icon(
+                            onPressed: _addCustomField,
+                            icon: const Icon(Icons.add),
+                            label: const Text('Add custom field'),
+                          ),
+                          OutlinedButton.icon(
+                            onPressed: _pickUserFieldOnly,
+                            icon: const Icon(Icons.library_add_outlined),
+                            label: const Text('Select from my fields'),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 32),
-                  Text(
-                    'Reset',
-                    style: Theme.of(context).textTheme.titleLarge,
+                  const SizedBox(height: 12),
+                  _SettingsSection(
+                    title: 'Test data',
+                    icon: Icons.auto_awesome,
+                    children: [
+                      const Text(
+                        'Generate random rows only for saved fields you select in the dialog.',
+                      ),
+                      const SizedBox(height: 12),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: OutlinedButton.icon(
+                          onPressed: _generateRandom,
+                          icon: const Icon(Icons.auto_awesome),
+                          label: const Text('Generate random records…'),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 8),
-                  OutlinedButton.icon(
-                    onPressed: _clearAllData,
-                    icon: const Icon(Icons.delete_forever_outlined),
-                    label: const Text('Clear all data'),
+                  const SizedBox(height: 12),
+                  _SettingsSection(
+                    title: 'Reset',
+                    icon: Icons.restart_alt,
+                    children: [
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: OutlinedButton.icon(
+                          onPressed: _clearAllData,
+                          icon: const Icon(Icons.delete_forever_outlined),
+                          label: const Text('Clear all data'),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -612,5 +638,34 @@ class _SettingsPageState extends State<SettingsPage> {
       default:
         return type.name;
     }
+  }
+}
+
+/// Collapsible accordion card used for each settings group.
+class _SettingsSection extends StatelessWidget {
+  const _SettingsSection({
+    required this.title,
+    required this.icon,
+    required this.children,
+  });
+
+  final String title;
+  final IconData icon;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: EdgeInsets.zero,
+      clipBehavior: Clip.antiAlias,
+      child: ExpansionTile(
+        initiallyExpanded: false,
+        leading: Icon(icon),
+        title: Text(title, style: Theme.of(context).textTheme.titleMedium),
+        expandedCrossAxisAlignment: CrossAxisAlignment.start,
+        childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        children: children,
+      ),
+    );
   }
 }

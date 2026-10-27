@@ -6,7 +6,9 @@ import '../../core/sort.dart';
 import '../../data/maintenance_repository.dart';
 import '../../models/field_definition.dart';
 import '../../models/maintenance_record.dart';
+import '../../models/ai_backend.dart';
 import '../../services/column_preferences_service.dart';
+import '../../services/litert_lm_service.dart';
 import '../../services/lm_studio_service.dart';
 import '../../services/settings_service.dart';
 import '../../utils/maintenance_ai_prompt.dart';
@@ -17,15 +19,18 @@ class MaintenanceHomeController extends ChangeNotifier {
     required ColumnPreferencesService columnPrefs,
     required SettingsService settings,
     required LmStudioService lmStudio,
+    required LiteRtLmService liteRtLm,
   })  : _repository = repository,
         _columnPrefs = columnPrefs,
         _settings = settings,
-        _lmStudio = lmStudio;
+        _lmStudio = lmStudio,
+        _liteRtLm = liteRtLm;
 
   final MaintenanceRepository _repository;
   final ColumnPreferencesService _columnPrefs;
   final SettingsService _settings;
   final LmStudioService _lmStudio;
+  final LiteRtLmService _liteRtLm;
 
   List<FieldDefinition> allColumns = [];
   List<FieldDefinition> visibleColumns = [];
@@ -132,7 +137,15 @@ class MaintenanceHomeController extends ChangeNotifier {
     notifyListeners();
     try {
       final prompt = buildMaintenanceAiPrompt(row, dataColumnsForAi);
-      final answer = await _lmStudio.askMaintenanceAssistant(prompt: prompt);
+      final backend = await _settings.loadAiBackend();
+      final answer = switch (backend) {
+        AiBackend.lmStudio => await _lmStudio.askMaintenanceAssistant(
+          prompt: prompt,
+        ),
+        AiBackend.liteRtLm => await _liteRtLm.askMaintenanceAssistant(
+          prompt: prompt,
+        ),
+      };
       await _repository.saveAiAnswer(row.id, answer);
       aiAnswersByRecordId[row.id] = answer;
       return answer;

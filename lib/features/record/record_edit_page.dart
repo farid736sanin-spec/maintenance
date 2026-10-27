@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../data/maintenance_repository.dart';
 import '../../models/field_definition.dart';
 import '../../utils/field_defaults.dart';
+import '../../widgets/kernel_build_button.dart';
 
 class RecordEditPage extends StatefulWidget {
   const RecordEditPage({super.key, this.recordId});
@@ -95,6 +96,7 @@ class _RecordEditPageState extends State<RecordEditPage> {
             onPressed: _loading ? null : _save,
             child: const Text('Save'),
           ),
+          const KernelBuildButton(),
         ],
       ),
       body: _buildBody(),
